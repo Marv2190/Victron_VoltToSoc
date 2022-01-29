@@ -13,6 +13,7 @@ akkuvolt = 0
 akkupro = 0
 dcpower = 0
 m = 1
+setakkuto = '{"value": 32}'
 
 logging.basicConfig(filename='Error.log', level=logging.DEBUG, format='%(asctime)s %(message)s', datefmt='%Y/%m/%d %H:%M:%S')
 
@@ -33,7 +34,7 @@ def on_disconnect(client, userdata, rc):
         logging.exception("Fehler beim reconnecten mit Broker")
         print("Error in Retrying to Connect with Broker")
         verbunden = 0
-        print(e.message, e.args)
+        print(e)
 
 def on_connect(client, userdata, flags, rc):
         global verbunden
@@ -68,7 +69,7 @@ def on_message(client, userdata, msg):
             akkupro = int(akkupro['value'])
 
     except Exception as e:
-        print(e.message, e.args)
+        print(e)
         print("Im VTS Programm ist etwas beim auslesen der Nachrichten schief gegangen")
 
 # Konfiguration MQTT
@@ -82,15 +83,18 @@ logging.debug("Programm Volt to SOC wurde gestartet")
 
 client.loop_start()
 time.sleep(1)
-
+print (setakkuto)
 while (1):
     m = 1+m
-    print(akkuvolt, dcpower, akkupro, m)
+    print(str(akkuvolt)+"V " + str(dcpower) +"W " + str(akkupro) + "% "+ str(m))
 
     # Wenn SOC über 32% aber Spannung unter 52V gesunken und Akkubelastung unter 200W, setze SOC auf 30
-    if akkupro >= 32 and akkuvolt <= 52 and dcpower <= 200:
-        print("Akku über 32% und Spannung unter 52V! Setze Akku auf 30%")
-        client.publish("W/" + cerboserial + "/vebus/276/Soc", 30)
+    if akkupro > 33 and akkuvolt < 52 and dcpower < 200 and dcpower > -200:
+        print("Akku über 33% und Spannung unter 52V! Setze Akku auf 32%")
+        try:
+            client.publish("W/" + cerboserial + "/vebus/276/Soc", setakkuto)
+        except Exception as e:
+            print(e)
     else:
-        print("Akkuprozent ist nicht über 32 oder Spannung unter 52 während unter 200W Belastung bestehen")
+        print("Akkuprozent ist nicht über 33% und Spannung unter 52V während unter 200W Belastung bestehen")
     time.sleep(3600)
