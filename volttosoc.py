@@ -7,7 +7,7 @@ import json
 
 verbunden = 0
 cerboserial = "123456789"    # Ist auch gleich VRM Portal ID
-broker_address = "192.168.1.167"
+broker_address = "192.168.1.xxx"
 
 akkuvolt = 0
 akkupro = 0
@@ -56,7 +56,7 @@ def on_message(client, userdata, msg):
         if msg.topic == "N/" + cerboserial + "/vebus/276/Dc/0/Voltage":   # Akku Spannung
 
             akkuvolt = json.loads(msg.payload)
-            akkuvolt = round(float(akkuvolt['value']),2)
+            akkuvolt = round(float(akkuvolt['value']), 2)
 
         if msg.topic == "N/" + cerboserial + "/system/0/Dc/Battery/Power":   # Akku Watt Nutzung
 
@@ -83,10 +83,10 @@ logging.debug("Programm Volt to SOC wurde gestartet")
 
 client.loop_start()
 time.sleep(1)
-print (setakkuto)
+print(setakkuto)
 while (1):
     m = 1+m
-    print(str(akkuvolt)+"V " + str(dcpower) +"W " + str(akkupro) + "% "+ str(m))
+    print(str(akkuvolt)+"V " + str(dcpower) + "W " + str(akkupro) + "% " + str(m))
 
     # Wenn SOC über 32% aber Spannung unter 52V gesunken und Akkubelastung unter 200W, setze SOC auf 30
     if akkupro > 33 and akkuvolt < 52 and dcpower < 200 and dcpower > -200:
